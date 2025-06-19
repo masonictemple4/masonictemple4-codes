@@ -2,17 +2,50 @@
 
 import { useEffect, useRef, useState } from "react";
 
+// Type definitions
+interface FormattedContent {
+  title: string;
+  sections: Array<{
+    heading: string;
+    items: string[];
+  }>;
+}
+
+interface CommandOutput {
+  type: 'text' | 'formatted' | 'error' | 'clear';
+  content: string | FormattedContent;
+}
+
+interface HistoryEntry {
+  command: string;
+  output: CommandOutput;
+  timestamp: Date;
+}
+
+interface Star {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  animationDelay: number;
+  duration: number;
+}
+
+type Commands = {
+  [key: string]: () => CommandOutput;
+};
+
 const TerminalPortfolio = () => {
-  const [history, setHistory] = useState([]);
-  const [currentInput, setCurrentInput] = useState('');
-  const [historyIndex, setHistoryIndex] = useState(-1);
-  const [commandHistory, setCommandHistory] = useState([]);
-  const inputRef = useRef(null);
-  const terminalRef = useRef(null);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [currentInput, setCurrentInput] = useState<string>('');
+  const [historyIndex, setHistoryIndex] = useState<number>(-1);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const terminalRef = useRef<HTMLDivElement>(null);
 
   // Available commands
-  const commands = {
-    help: () => ({
+  const commands: Commands = {
+    help: (): CommandOutput => ({
       type: 'text',
       content: `Available commands:
   help      - Show this help message
@@ -27,7 +60,7 @@ const TerminalPortfolio = () => {
   cat <section> - Display content of a section`
     }),
 
-    whoami: () => ({
+    whoami: (): CommandOutput => ({
       type: 'text',
       content: `Mason Tucker | Software Engineer
 
@@ -38,7 +71,7 @@ Passionate about Go, Python, and building products from the ground up.
 Type 'about' for more details or 'help' to see what else I can tell you!`
     }),
 
-    about: () => ({
+    about: (): CommandOutput => ({
       type: 'text',
       content: `Hello! I'm Mason Tucker, a Software Engineer with 7+ years of experience 
 in high-risk, fast-paced startup environments.
@@ -56,7 +89,7 @@ Awards include the 2023 SWFL Inc Innovation Award, 2018 Florida Governor's Cup
 Welcome to my terminal-style portfolio!`
     }),
 
-    resume: () => ({
+    resume: (): CommandOutput => ({
       type: 'formatted',
       content: {
         title: 'Mason Tucker - Software Engineer',
@@ -100,7 +133,7 @@ Welcome to my terminal-style portfolio!`
       }
     }),
 
-    portfolio: () => ({
+    portfolio: (): CommandOutput => ({
       type: 'formatted',
       content: {
         title: 'Portfolio Projects',
@@ -137,7 +170,7 @@ Welcome to my terminal-style portfolio!`
       }
     }),
 
-    contact: () => ({
+    contact: (): CommandOutput => ({
       type: 'text',
       content: `Contact Information:
   Email: Masonictemple4codes@gmail.com
@@ -147,7 +180,7 @@ Welcome to my terminal-style portfolio!`
   Website: masonictemple4.codes`
     }),
 
-    skills: () => ({
+    skills: (): CommandOutput => ({
       type: 'formatted',
       content: {
         title: 'Technical Skills',
@@ -198,7 +231,7 @@ Welcome to my terminal-style portfolio!`
       }
     }),
 
-    ls: () => ({
+    ls: (): CommandOutput => ({
       type: 'text',
       content: `total 7
 drwxr-xr-x 2 user user 4096 Jun  2 2025 about
@@ -210,11 +243,11 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
 -rw-r--r-- 1 user user  128 Jun  2 2025 README.md`
     }),
 
-    clear: () => ({ type: 'clear' })
+    clear: (): CommandOutput => ({ type: 'clear', content: '' })
   };
 
   // Handle cat command with argument
-  const handleCatCommand = (args) => {
+  const handleCatCommand = (args: string[]): CommandOutput => {
     const section = args[0];
     if (!section) {
       return {
@@ -223,8 +256,9 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
       };
     }
     
-    if (commands[section] && section !== 'clear' && section !== 'ls') {
-      return commands[section]();
+    const commandFn = commands[section];
+    if (commandFn && section !== 'clear' && section !== 'ls') {
+      return commandFn();
     }
     
     return {
@@ -233,7 +267,7 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
     };
   };
 
-  const processCommand = (input) => {
+  const processCommand = (input: string): CommandOutput | null => {
     const trimmed = input.trim().toLowerCase();
     const [command, ...args] = trimmed.split(' ');
     
@@ -243,8 +277,9 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
       return handleCatCommand(args);
     }
     
-    if (commands[command]) {
-      return commands[command]();
+    const commandFn = commands[command];
+    if (commandFn) {
+      return commandFn();
     }
     
     return {
@@ -253,7 +288,7 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
     };
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === 'Enter') {
       e.preventDefault();
       
@@ -261,14 +296,16 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
       
       const output = processCommand(currentInput);
       
+      if (!output) return;
+      
       // Add command to history
-      const newEntry = {
+      const newEntry: HistoryEntry = {
         command: currentInput,
         output: output,
         timestamp: new Date()
       };
       
-      if (output?.type === 'clear') {
+      if (output.type === 'clear') {
         setHistory([]);
       } else {
         setHistory(prev => [...prev, newEntry]);
@@ -281,7 +318,7 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (historyIndex < commandHistory.length - 1) {
@@ -313,7 +350,7 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
   useEffect(() => {
     // Display initial help command
     const helpOutput = commands.help();
-    const initialEntry = {
+    const initialEntry: HistoryEntry = {
       command: 'help',
       output: helpOutput,
       timestamp: new Date()
@@ -327,24 +364,25 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
     }
   }, []);
 
-  const handleTerminalClick = () => {
+  const handleTerminalClick = (): void => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   };
 
-  const renderOutput = (output) => {
+  const renderOutput = (output: CommandOutput) => {
     if (!output) return null;
     
     switch (output.type) {
       case 'text':
-        return <pre className="whitespace-pre-wrap">{output.content}</pre>;
+        return <pre className="whitespace-pre-wrap">{output.content as string}</pre>;
       
       case 'formatted':
+        const formattedContent = output.content as FormattedContent;
         return (
           <div>
-            <h3 className="text-green-400 font-bold mb-2">{output.content.title}</h3>
-            {output.content.sections.map((section, idx) => (
+            <h3 className="text-green-400 font-bold mb-2">{formattedContent.title}</h3>
+            {formattedContent.sections.map((section, idx) => (
               <div key={idx} className="mb-3">
                 <h4 className="text-blue-400 font-semibold">{section.heading}:</h4>
                 <ul className="ml-4">
@@ -358,16 +396,16 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
         );
       
       case 'error':
-        return <pre className="text-red-400 whitespace-pre-wrap">{output.content}</pre>;
+        return <pre className="text-red-400 whitespace-pre-wrap">{output.content as string}</pre>;
       
       default:
-        return <pre className="whitespace-pre-wrap">{output.content}</pre>;
+        return <pre className="whitespace-pre-wrap">{output.content as string}</pre>;
     }
   };
 
   // Generate random stars for the background
-  const generateStars = () => {
-    const stars = [];
+  const generateStars = (): Star[] => {
+    const stars: Star[] = [];
     for (let i = 0; i < 150; i++) {
       stars.push({
         id: i,
@@ -381,14 +419,21 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
     return stars;
   };
 
-  const [stars] = useState(generateStars);
+  const [stars, setStars] = useState<Star[]>([]);
+  const [isClient, setIsClient] = useState<boolean>(false);
+
+  // Generate stars only on client side to avoid hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+    setStars(generateStars());
+  }, []);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Space Background */}
       <div className="fixed inset-0 bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900">
-        {/* Stars */}
-        {stars.map((star) => (
+        {/* Stars - only render on client */}
+        {isClient && stars.map((star) => (
           <div
             key={star.id}
             className="absolute rounded-full bg-white animate-pulse"
@@ -403,9 +448,9 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
           />
         ))}
         
-        {/* Floating particles */}
+        {/* Floating particles - only render on client */}
         <div className="absolute inset-0">
-          {Array.from({ length: 20 }).map((_, i) => (
+          {isClient && Array.from({ length: 20 }).map((_, i) => (
             <div
               key={i}
               className="absolute w-1 h-1 bg-blue-300 rounded-full animate-float"
