@@ -98,14 +98,14 @@ Welcome to my terminal-style portfolio!`
             heading: 'Experience',
             items: [
               'Listella - Founding/Backend Software Engineer (2021-2025)',
-              ' Built zero-commission real estate platform backend from scratch',
-              ' Developed in-house REST framework in Go + gRPC macro services',
-              ' Core services: listings, payments, messaging, LLM integration, AUTH/RBAC',
+              '• Built zero-commission real estate platform backend from scratch',
+              '• Developed in-house REST framework in Go + gRPC macro services',
+              '• Core services: listings, payments, messaging, LLM integration, AUTH/RBAC',
               '',
               'Roomdig - Founding/Software Engineer (2017-2021)',
-              ' Designed complete technical stack for college housing marketplace',
-              ' Built Python Django monolith + iOS app rewrite in Swift 4',
-              ' Features: payments, matching algorithms, real-time messaging',
+              '• Designed complete technical stack for college housing marketplace',
+              '• Built Python Django monolith + iOS app rewrite in Swift 4',
+              '• Features: payments, matching algorithms, real-time messaging',
               '',
               'RobinTek - Web Developer Intern (2013-2014)',
               'Micro Center - Technical Support (2016-2017)'
@@ -480,7 +480,7 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
           
           <div 
             ref={terminalRef}
-            className="bg-black/80 backdrop-blur-sm rounded-lg p-4 h-[600px] overflow-y-auto cursor-text border border-green-500/20 shadow-2xl shadow-green-500/10"
+            className="bg-black/80 backdrop-blur-sm rounded-lg p-4 h-[600px] overflow-y-auto cursor-text border border-green-500/20 shadow-2xl shadow-green-500/10 scrollbar-hide"
             onClick={handleTerminalClick}
           >
             {/* Command History */}
@@ -536,6 +536,17 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
         
         .bg-gradient-radial {
           background: radial-gradient(circle, var(--tw-gradient-stops));
+        }
+
+        /* Hide scrollbar for webkit browsers */
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .scrollbar-hide {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
         }
       `}</style>
     </div>
