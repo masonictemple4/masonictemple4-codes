@@ -480,7 +480,7 @@ drwxr-xr-x 2 user user 4096 Jun  2 2025 skills
           
           <div 
             ref={terminalRef}
-            className="bg-black/80 backdrop-blur-sm rounded-lg p-4 h-96 overflow-y-auto cursor-text border border-green-500/20 shadow-2xl shadow-green-500/10"
+            className="bg-black/80 backdrop-blur-sm rounded-lg p-4 h-[600px] overflow-y-auto cursor-text border border-green-500/20 shadow-2xl shadow-green-500/10"
             onClick={handleTerminalClick}
           >
             {/* Command History */}
