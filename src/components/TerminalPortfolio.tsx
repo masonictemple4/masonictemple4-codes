@@ -141,7 +141,7 @@ Welcome to my terminal-style portfolio!`
           {
             heading: 'Listella (2021-2025)',
             items: [
-              'Zero-commission real estate platform - Co-founder/Backend Engineer',
+              'Zero-commission real estate platform - Backend Engineer',
               'Built entire backend from scratch using Go REST framework',
               'Technologies: Go, gRPC, PostgreSQL, Redis, Docker, GCP Cloud Run',
               'Features: listing workflow, image processing, payments, real-time messaging',
